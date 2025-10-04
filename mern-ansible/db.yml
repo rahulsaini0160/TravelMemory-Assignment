@@ -1,0 +1,33 @@
+- name: Setup Database Server (MongoDB)
+  hosts: db
+  become: yes
+  tasks:
+
+    - name: Update OS packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install MongoDB
+      yum:
+        name: mongodb-org
+        state: present
+
+    - name: Start and enable MongoDB service
+      service:
+        name: mongod
+        state: started
+        enabled: yes
+
+    - name: Create MongoDB user for app
+      shell: |
+        mongosh -u admin -p rahul123 --authenticationDatabase admin --eval '
+          if (db.getSiblingDB("testDatabase").getUser("appUser") == null) {
+            db.getSiblingDB("testDatabase").createUser({
+              user: "appUser",
+              pwd: "rahul123",
+              roles: [{role: "readWrite", db: "testDatabase"}]
+            })
+          }'
+      args:
+        executable: /bin/bash

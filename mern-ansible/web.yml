@@ -1,0 +1,45 @@
+- name: Setup Web Server
+  hosts: web
+  become: yes
+  tasks:
+
+    - name: Update packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install git, Node.js, NPM
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - git
+        - nodejs
+        - npm
+
+    - name: Clone backend repo
+      git:
+        repo: 'https://github.com/UnpredictablePrashant/TravelMemory'
+        dest: /home/ec2-user/TravelMemory
+        force: yes
+
+    - name: Install backend dependencies
+      npm:
+        path: /home/ec2-user/TravelMemory/backend
+        state: present
+
+    - name: Start or restart backend with PM2
+      shell: |
+        pm2 describe travelmemory-backend >/dev/null 2>&1 && pm2 restart travelmemory-backend || pm2 start index.js --name travelmemory-backend
+      args:
+        chdir: /home/ec2-user/TravelMemory/backend
+
+    - name: Build frontend
+      command: npm run build
+      args:
+        chdir: /home/ec2-user/TravelMemory/frontend
+
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded

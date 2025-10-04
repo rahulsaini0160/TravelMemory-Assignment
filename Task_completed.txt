@@ -1,0 +1,9 @@
+What’s completed:
+
+Database server: MongoDB installed, running, and app user created.
+
+Web server: Node.js backend installed and running with PM2, frontend built.
+
+Ansible playbooks: db.yml and web.yml executed successfully.
+
+End-to-end setup: Frontend and backend code deployed, MongoDB connection tested.
